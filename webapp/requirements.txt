@@ -1,1 +1,2 @@
-flask
+Flask==2.0.2
+psycopg2==2.9.1

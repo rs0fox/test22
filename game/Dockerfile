@@ -1,12 +1,10 @@
-FROM python:3.8-slim
+FROM python:3.9-slim
 
 WORKDIR /app
 
-COPY . /app
-
+COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Run the script to create the executable and upload to S3
-RUN chmod +x create_exe.sh && ./create_exe.sh
+COPY . /app
 
 CMD ["python", "game.py"]
