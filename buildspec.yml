@@ -1,5 +1,10 @@
 version: 0.2
 
+env:
+  secrets-manager:
+    DOCKERHUB_USERNAME: arn:aws:secretsmanager:ap-south-1:339712721384:secret:dockerhub-G8QpL5:DOCKERHUB_USERNAME
+    DOCKERHUB_PASSWORD: arn:aws:secretsmanager:ap-south-1:339712721384:secret:dockerhub-G8QpL5:DOCKERHUB_PASSWORD
+
 phases:
   install:
     commands:
