@@ -1,22 +1,25 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, render_template
+import psycopg2  # For PostgreSQL, use `mysql-connector-python` for MySQL
 
 app = Flask(__name__)
 
+def get_scores():
+    scores = []
+    try:
+        conn = psycopg2.connect("dbname=game_db user=your_user password=your_password host=db_host")
+        cur = conn.cursor()
+        cur.execute("SELECT username, score FROM scores ORDER BY score DESC")
+        scores = cur.fetchall()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error retrieving scores: {e}")
+    return scores
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    scores = get_scores()
+    return render_template('index.html', scores=scores)
 
-@app.route('/download')
-def download():
-    return '''
-        <h1>Download the Game</h1>
-        <a href="https://<s3-bucket-url>/game-executable">Download Game</a>
-    '''
-
-@app.route('/save_score', methods=['POST'])
-def save_score():
-    data = request.json
-    username = data['username']
-    score = data['score']
-    # Save to the database (PostgreSQL/MySQL)
-    # Assuming
+if __name__ == "__main__":
+    app.run(debug=True)
