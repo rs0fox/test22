@@ -1,0 +1,28 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing Docker and Buildx..."
+      - apt-get update && apt-get install -y docker.io
+      - docker buildx create --use
+      - docker run --privileged --rm tonistiigi/binfmt --install all
+      - echo "Retrieving Docker Hub credentials from Secrets Manager..."
+      - export DOCKERHUB_USERNAME=$(aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:ap-south-1:339712721384:secret:dockerhub-G8QpL5 --query 'SecretString' --output text | jq -r .username)
+      - export DOCKERHUB_PASSWORD=$(aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:ap-south-1:339712721384:secret:dockerhub-G8QpL5 --query 'SecretString' --output text | jq -r .password)
+  pre_build:
+    commands:
+      - echo "Logging in to Docker Hub..."
+      - echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+      - echo "Building multi-arch Docker image for game..."
+      - cd game
+      - docker buildx build --platform linux/amd64,linux/arm64 -t $DOCKERHUB_USERNAME/python-game:$CODEBUILD_RESOLVED_SOURCE_VERSION --push .
+      - cd ../webapp
+      - echo "Building multi-arch Docker image for webapp..."
+      - docker buildx build --platform linux/amd64,linux/arm64 -t $DOCKERHUB_USERNAME/python-webapp:$CODEBUILD_RESOLVED_SOURCE_VERSION --push .
+  post_build:
+    commands:
+      - echo "Build and push of multi-arch images completed successfully!"
+artifacts:
+  files:
+    - '**/*'
