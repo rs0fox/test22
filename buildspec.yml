@@ -16,8 +16,10 @@ phases:
       
   pre_build:
     commands:
-      - echo "Building Docker image for game..."
+      - echo "Checking Dockerfile and requirements.txt..."
+      - ls -l game/
       - cd game
+      - echo "Building Docker image for game..."
       - docker build -t $DOCKERHUB_USERNAME/python-game:$CODEBUILD_RESOLVED_SOURCE_VERSION .
       - cd ../webapp
       - echo "Building Docker image for webapp..."
