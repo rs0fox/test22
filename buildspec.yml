@@ -13,24 +13,22 @@ phases:
       - echo $SECRET | jq -r '.password' > /tmp/dockerhub_password
       - echo "Logging in to Docker Hub..."
       - docker login -u $(cat /tmp/dockerhub_username) -p $(cat /tmp/dockerhub_password)
-      
+
   pre_build:
     commands:
-      - echo "Checking Dockerfile and requirements.txt..."
+      - echo "Listing files in the game directory..."
       - ls -l game/
-      - cd game
       - echo "Building Docker image for game..."
+      - cd game
       - docker build -t $DOCKERHUB_USERNAME/python-game:$CODEBUILD_RESOLVED_SOURCE_VERSION .
-      - cd ../webapp
-      - echo "Building Docker image for webapp..."
-      - docker build -t $DOCKERHUB_USERNAME/python-webapp:$CODEBUILD_RESOLVED_SOURCE_VERSION .
+      - cd ..
       
   build:
     commands:
       - echo "Pushing Docker images to Docker Hub..."
       - docker push $DOCKERHUB_USERNAME/python-game:$CODEBUILD_RESOLVED_SOURCE_VERSION
       - docker push $DOCKERHUB_USERNAME/python-webapp:$CODEBUILD_RESOLVED_SOURCE_VERSION
-      
+
   post_build:
     commands:
       - echo "Build completed successfully!"
